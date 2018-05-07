@@ -7,6 +7,7 @@
 # import
 # --------------------------------------------------
 import os
+import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
@@ -112,7 +113,8 @@ class MNIST_MLP():
         return loss_acc
 
 class CalcPerformance():
-    def __init__(self, n_trial=3, data_use_ratio=0.1, objection="error_rate", verbose=True, save_fig=True):
+    def __init__(self, n_trial=3, data_use_ratio=0.1, objection="error_rate",
+                 verbose=True, save_fig=True, save_file_header="result/result"):
         """
         戻り値なし
         """
@@ -121,6 +123,8 @@ class CalcPerformance():
         self.objection = objection
         self.verbose = verbose
         self.save_fig = save_fig
+        self.save_file_header = save_file_header
+        self.save_fname = None
         self.summary_list = []
         if verbose:
             print("n_trial        :", n_trial)
@@ -168,6 +172,11 @@ class CalcPerformance():
         # グラフの保存
         if self.save_fig:
             self.plot_output(save_flag=True)
+
+        # インスタンスの保存
+        self.save_fname = self.save_file_header + "{:0>3d}.pickle".format(len(self.summary_list))
+        with open(self.save_fname, "wb") as f:
+            pickle.dump(self, f)
 
         # 戻り値算出
         return output_dict[self.objection]
@@ -232,3 +241,9 @@ if __name__ == "__main__":
     min_function.plot_output(save_flag=False)
     print("Best Result")
     min_function.print_best()
+
+    fname = min_function.save_fname
+    with open(fname, "rb") as f:
+        pickle_data = pickle.load(f)
+    print("\n---Pickle Data---")
+    pickle_data.print_best()
